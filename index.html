@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-063933E3C2"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-063933E3C2");
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Murmurations: Flocks of Starlings, Schools of Fish (Boids)</title>
+    <meta
+      name="description"
+      content="Murmurations: thousands of birds follow three simple rules (keep apart, fly the same way, stay together) and turn as one, like starlings at dusk. Craig Reynolds' boids in the browser, with a falcon under your pointer."
+    />
+    <meta name="author" content="Olivier Giulieri" />
+    <link
+      rel="canonical"
+      href="https://evoluteur.github.io/murmurations/"
+    />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <meta name="theme-color" content="#1a212d" />
+    <meta property="og:site_name" content="Murmurations" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Murmurations" />
+    <meta
+      property="og:description"
+      content="Thousands of birds follow three simple rules and turn as one, like starlings at dusk."
+    />
+    <meta
+      property="og:url"
+      content="https://evoluteur.github.io/murmurations/"
+    />
+    <meta
+      property="og:image"
+      content="https://evoluteur.github.io/murmurations/murmurations.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Overpass"
+    />
+    <link id="omg-core-css" rel="stylesheet" href="css/core.css" />
+    <script>
+      // Themes (dark, light, evol-blue) are copies of omg-themes; set OMG_THEMES_BASE to link the hosted ones instead.
+      window.OMG_THEMES_BASE = ""; // or "https://evoluteur.github.io/omg-themes/" to link the hosted themes
+      window.OMG_DEFAULT_THEME = "dark";
+      (function () {
+        var t = window.OMG_DEFAULT_THEME;
+        try {
+          t = localStorage.getItem("omg-theme") || t;
+        } catch (e) {}
+        if (t !== "dark" && t !== "light" && t !== "evol-blue")
+          t = window.OMG_DEFAULT_THEME;
+        document.documentElement.setAttribute("data-theme", t);
+        // written here (not in the markup) so the saved theme loads before first paint
+        document.write(
+          '<link id="omg-theme-css" rel="stylesheet" href="' +
+            window.OMG_THEMES_BASE +
+            "css/themes/" +
+            t +
+            "/" +
+            t +
+            '.css" />',
+        );
+      })();
+    </script>
+    <link id="omg-density-css" rel="stylesheet" href="css/densities.css" />
+    <link rel="stylesheet" href="css/boids.css" />
+
+    <script src="js/omg.js"></script>
+    <script src="js/boids.js"></script>
+  </head>
+
+  <body
+    onload="
+      setupPage('home');
+      initBoids();
+    "
+    id="omg-body"
+  >
+    <div id="omg-header">
+      <h1>Murmurations</h1>
+      <div id="omg-header-tools">
+        <div id="omg-theme-picker"></div>
+        <a
+          id="omg-github"
+          href="https://github.com/evoluteur/murmurations"
+          target="_blank"
+          rel="noopener"
+          title="Murmurations on GitHub"
+          aria-label="Murmurations on GitHub"
+          ><svg viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" /></svg
+        ></a>
+      </div>
+    </div>
+    <h2>Three rules, one flock</h2>
+    <div class="content">
+      <div class="app-layout">
+        <div class="art-wrap">
+          <canvas id="sky" aria-label="A flock of birds"></canvas>
+        </div>
+        <div class="controls">
+          <label>Flock <select id="preset"></select></label>
+          <p id="preset-text" class="hint"></p>
+          <label><span>Separation <b id="v-sep"></b></span><input id="sep" type="range" min="0" max="3" step="0.1" /></label>
+          <label><span>Alignment <b id="v-ali"></b></span><input id="ali" type="range" min="0" max="3" step="0.1" /></label>
+          <label><span>Cohesion <b id="v-coh"></b></span><input id="coh" type="range" min="0" max="3" step="0.1" /></label>
+          <label><span>Vision <b id="v-vision"></b></span><input id="vision" type="range" min="15" max="100" step="5" /></label>
+          <label><span>Speed <b id="v-speed"></b></span><input id="speed" type="range" min="1" max="7" step="0.5" /></label>
+          <label><span>Birds <b id="v-n"></b></span><input id="n" type="range" min="100" max="5000" step="100" /></label>
+          <label class="check"><input type="checkbox" id="falcon" /> A falcon attacks now and then</label>
+          <label class="check"><input type="checkbox" id="trails" /> Trails</label>
+          <div class="buttons">
+            <button type="button" id="btn-run">Pause</button>
+            <button type="button" id="btn-new" class="secondary">New flock</button>
+            <button type="button" id="btn-png" class="secondary wide">Download PNG</button>
+          </div>
+          <p class="hint">Move the pointer over the sky: it is a falcon, and the flock flees. The address of the page keeps the settings, to share them.</p>
+        </div>
+      </div>
+
+      <h3>No leader, no plan</h3>
+      <div class="explain">
+        <p>
+          On winter evenings, hundreds of thousands of starlings gather over
+          their roost and fly as one dark, shifting cloud, a murmuration. No
+          bird leads it. In 1986 the computer graphics researcher Craig
+          Reynolds showed how such a flock can steer itself: give each "boid"
+          (bird-oid) three rules, applied only to the neighbors it can see.
+        </p>
+        <p>
+          <em>Separation</em>: don't crowd your neighbors.
+          <em>Alignment</em>: fly the way they fly. <em>Cohesion</em>: move
+          toward the middle of them. That is all. The shapes of the flock,
+          its waves, splits and sudden turns, appear by themselves. The
+          method won Reynolds an Academy Award, after flocks of bats and
+          herds of penguins in <em>Batman Returns</em> were made with it.
+        </p>
+        <p>
+          In 2008, physicists filmed real starlings over Rome in 3D and found
+          that each bird keeps track of about seven neighbors, however close
+          or far they are. When a falcon dives, the birds nearest to it
+          swerve, their neighbors follow, and a wave of turning runs across
+          the whole flock faster than any single bird flies. Change the
+          weights of the rules and the same birds become a school of fish,
+          a swarm of midges or a drift of fireflies.
+        </p>
+      </div>
+
+      <div class="footer">
+        <p>
+          Murmurations is open source on
+          <a href="https://github.com/evoluteur/murmurations">GitHub</a>
+          with an MIT license.
+        </p>
+        <p>
+          Had fun browsing the app?
+          <a href="https://github.com/sponsors/evoluteur"
+            >Buy me a coffee by becoming a sponsor</a
+          >.
+        </p>
+        <p>
+          You may also enjoy
+          <a href="https://evoluteur.github.io/slime-mold/">Slime Mold</a>,
+          <a href="https://evoluteur.github.io/flow-fields/">Flow Fields</a>
+          and
+          <a href="https://evoluteur.github.io/game-of-life/">Game of Life</a>.
+          See them all on
+          <a href="https://evoluteur.github.io/generative-art.html">Generative Art</a>.
+        </p>
+        <p class="copyright">
+          &#169; 2026
+          <a href="https://evoluteur.github.io/">Olivier Giulieri</a>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
