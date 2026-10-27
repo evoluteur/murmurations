@@ -63,15 +63,30 @@ const spawn = () => {
   vx = new Float32Array(n);
   vy = new Float32Array(n);
   blink = new Float32Array(n);
-  // a loose cloud, everyone heading roughly the same way
-  const a0 = Math.random() * Math.PI * 2;
+  // a few loose, uneven clumps, each heading its own way, plus some strays
+  const gauss = () => (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
+  const clumps = Array.from({ length: 3 + Math.floor(Math.random() * 4) }, () => ({
+    x: W * (0.25 + Math.random() * 0.5),
+    y: W * (0.25 + Math.random() * 0.5),
+    rx: W * (0.05 + Math.random() * 0.12),
+    ry: W * (0.05 + Math.random() * 0.12),
+    a: Math.random() * Math.PI * 2,
+  }));
   for (let i = 0; i < n; i++) {
-    const r = Math.sqrt(Math.random()) * W * 0.25, t = Math.random() * Math.PI * 2;
-    px[i] = W / 2 + Math.cos(t) * r;
-    py[i] = W / 2 + Math.sin(t) * r * 0.7;
-    const a = a0 + (Math.random() - 0.5) * 1.5;
-    vx[i] = Math.cos(a) * state.speed;
-    vy[i] = Math.sin(a) * state.speed;
+    let a;
+    if (Math.random() < 0.15) {
+      px[i] = W * (0.12 + Math.random() * 0.76);
+      py[i] = W * (0.12 + Math.random() * 0.76);
+      a = Math.random() * Math.PI * 2;
+    } else {
+      const c = clumps[Math.floor(Math.random() * clumps.length)];
+      px[i] = c.x + gauss() * c.rx;
+      py[i] = c.y + gauss() * c.ry;
+      a = c.a + (Math.random() - 0.5) * 2.5;
+    }
+    const sp = state.speed * (0.55 + Math.random() * 0.45);
+    vx[i] = Math.cos(a) * sp;
+    vy[i] = Math.sin(a) * sp;
     blink[i] = Math.random() * 100;
   }
 };
