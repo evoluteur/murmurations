@@ -107,6 +107,8 @@ const bucket = () => {
   }
 };
 
+const AROUND = [0, 1, 2, 5, 8, 7, 6, 3]; // the 8 cells around, clockwise
+const MIX = 0.5; // 0: always from the top-left, 1: always all around
 const step = () => {
   const n = px.length, R = state.vision, R2 = R * R, sepR2 = (R * 0.22) ** 2;
   const max = state.speed, min = state.speed * 0.55, pull = LOOKS[state.look].pull;
@@ -116,25 +118,30 @@ const step = () => {
     let sx = 0, sy = 0, avx = 0, avy = 0, cx = 0, cy = 0, k = 0;
     const gx = Math.min(cols - 1, Math.max(0, Math.floor(px[i] / cellSize) + 1));
     const gy = Math.min(cols - 1, Math.max(0, Math.floor(py[i] / cellSize) + 1));
-    for (let dy = -1; dy <= 1; dy++)
-      for (let dx = -1; dx <= 1; dx++) {
-        const X = gx + dx, Y = gy + dy;
-        if (X < 0 || Y < 0 || X >= cols || Y >= cols) continue;
-        for (let j = head[Y * cols + X]; j >= 0 && k < 24; j = next[j]) {
-          if (j === i) continue;
-          const ddx = px[i] - px[j], ddy = py[i] - py[j], d2 = ddx * ddx + ddy * ddy;
-          if (d2 > R2) continue;
-          k++;
-          avx += vx[j];
-          avy += vy[j];
-          cx += px[j];
-          cy += py[j];
-          if (d2 < sepR2 && d2 > 0) {
-            sx += ddx / d2;
-            sy += ddy / d2;
-          }
+    // each bird looks at up to 24 neighbors in the 9 cells around it. Half
+    // the time it scans the cells from the top-left (dense areas then tend to
+    // form rows), half the time from its own cell outward, starting from a
+    // random side (all directions alike, but too even): a bit of both.
+    const fair = Math.random() < MIX, o = Math.floor(Math.random() * 8);
+    for (let c = 0; c < 9; c++) {
+      const d = fair ? (c === 0 ? 4 : AROUND[(c - 1 + o) % 8]) : c;
+      const X = gx + (d % 3) - 1, Y = gy + Math.floor(d / 3) - 1;
+      if (X < 0 || Y < 0 || X >= cols || Y >= cols) continue;
+      for (let j = head[Y * cols + X]; j >= 0 && k < 24; j = next[j]) {
+        if (j === i) continue;
+        const ddx = px[i] - px[j], ddy = py[i] - py[j], d2 = ddx * ddx + ddy * ddy;
+        if (d2 > R2) continue;
+        k++;
+        avx += vx[j];
+        avy += vy[j];
+        cx += px[j];
+        cy += py[j];
+        if (d2 < sepR2 && d2 > 0) {
+          sx += ddx / d2;
+          sy += ddy / d2;
         }
       }
+    }
     let fx = 0, fy = 0;
     if (k) {
       // keep apart, fly the same way, stay together
