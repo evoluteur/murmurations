@@ -1,7 +1,7 @@
 {
   "name": "murmurations",
   "version": "1.0.0",
-  "description": "Murmurations: thousands of birds follow three simple rules (keep apart, fly the same way, stay together) and turn as one, like starlings at dusk. Craig Reynolds' boids in the browser, with a falcon under your pointer.",
+  "description": "Thousands of birds follow three simple rules (keep apart, fly the same way, stay together) and turn as one, like starlings at dusk. Craig Reynolds' boids in the browser, with a falcon under your pointer.",
   "repository": "github:evoluteur/murmurations",
   "homepage": "https://evoluteur.github.io/murmurations/",
   "copyright": "(c) 2026 Olivier Giulieri",
