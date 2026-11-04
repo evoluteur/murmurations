@@ -2,6 +2,8 @@
 
 Thousands of birds follow three simple rules (keep apart, fly the same way, stay together) and turn as one, like starlings at dusk. Craig Reynolds' boids in the browser, with a falcon under your pointer. No sign-up, no libraries.
 
+![Murmurations — thousands of starlings scatter from your pointer and turn as one](./murmurations-demo.gif)
+
 **[▶ Watch the flock](https://evoluteur.github.io/murmurations/)**
 
 [![Murmurations](murmurations.png)](https://evoluteur.github.io/murmurations/)
